@@ -18,6 +18,7 @@ export default function Navbar() {
       {navLinks.map((link, i) => {
         return (
           <Link
+            key={i}
             id={i + ""}
             className={"m-2 mx-8 text-md hover:text-gold"}
             href={link.href}
