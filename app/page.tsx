@@ -1,18 +1,27 @@
 import React from "react";
-import Button from "./components/Button/Button";
-import { ping } from "@/data/api";
-export default async function Home() {
-  const helloPromise = ping().catch((e) => {
-    console.error(e);
-    return "promise failed";
-  });
-
-  const helloData = (await Promise.all([helloPromise]))[0];
-
+import Link from "next/link";
+import Image from "next/image";
+import Input from "./components/Input";
+import Button from "./components/Button";
+export default function Home() {
   return (
-    <div>
-      <h1>hello, world!x</h1>
-      <Button helloData={helloData} />
+    <div className="absolute justify-center text-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div>
+        <h1 className="font-beaufortHeavy text-whiteish text-xlg font-extrabold">
+          LoL Skin Battle
+        </h1>
+        <Image
+          src="/../public/divider.png"
+          alt="divider"
+          width="634"
+          height="50"
+          className="mx-auto"
+        />
+      </div>
+
+      <Input placeHolder="Enter nickname" size="text-md2" />
+
+      <Button label="START" href="game" />
     </div>
   );
 }
