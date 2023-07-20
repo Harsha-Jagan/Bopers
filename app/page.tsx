@@ -11,7 +11,7 @@ export default function Home() {
           LoL Skin Battle
         </h1>
         <Image
-          src="/../public/divider.png"
+          src="/divider.png"
           alt="divider"
           width="634"
           height="50"
