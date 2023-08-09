@@ -1,23 +1,23 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 /**
- *
+ *  canvas creation inputs
  */
 type Props = {
-  canvasID: string;
+  canvasID: string; //id of the html canvas element on which to render
   imageURL: string;
-  sx?: number;
+  sx?: number;  //refer to javascript docs for canvas crop indices
   sy?: number;
 };
 
 /**
- *
+ *  hook for displaying cropped image on a canvas
  * @param props
- * @returns
+ * @returns void
  */
 const useCanvas = (props: Props) => {
   /**
-   *
+   *  set canvas
    */
   useEffect(() => {
     let canvas;

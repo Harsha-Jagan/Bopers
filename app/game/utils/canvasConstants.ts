@@ -1,3 +1,6 @@
+/**
+ * constants used for useCanvas hook
+ */
 const CANVAS_ID = "mycanvas";
 const RIOT_IMG_WIDTH = 1215;
 const RIOT_IMG_HEIGHT = 717;

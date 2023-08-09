@@ -1,8 +1,12 @@
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
 import Input from "./components/Input";
 import Button from "./components/Button";
+
+/**
+ *
+ * @returns Home page for the app
+ */
 export default function Home() {
   return (
     <div className="absolute justify-center text-center top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

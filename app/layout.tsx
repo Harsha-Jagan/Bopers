@@ -2,11 +2,19 @@ import Navbar from "./components/Navbar";
 import "./globals.css";
 import React from "react";
 
+/**
+ * metadata for home page seo
+ */
 export const metadata = {
   title: "Boldle",
   description: "An app made for bopers",
 };
 
+/**
+ * layout of navbar and children in homepage
+ * @param param0 children
+ * @returns homepage
+ */
 export default function RootLayout({
   children,
 }: {
@@ -22,6 +30,5 @@ export default function RootLayout({
         <div className="grow relative flex flex-col">{children}</div>
       </body>
     </html>
-    // className="flex flex-col bg-background-img bg-cover"
   );
 }

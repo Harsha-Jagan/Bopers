@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   CANVAS_ID,
   CANVAS_WIDTH,
@@ -8,75 +8,42 @@ import {
 import UserInput from "./UserInput";
 import DisplayCorrectAnswer from "./DisplayCorrectAnswer";
 import { SkinMap } from "@/data/types";
-import usePrompt from "../hooks/usePrompt";
-import { PromptStatus } from "../hooks/usePrompt";
+import useGameRound from "../hooks/useGameRound";
 import { Champion } from "../utils/types";
-import NextButton from "./NextButton";
-import Card from "../../components/Card";
+
 /**
- *
+ *  Skinmap fetched from riot's api containing list of skins for each champion
  */
 type GameClientProps = {
   skinMap: SkinMap;
 };
 
 /**
- *
- */
-enum RoundStatus {
-  STARTED,
-  TIMEDOUT,
-  GIVEUP,
-  FINISHED,
-}
-
-/**
- *
+ *  Handles logic for game state for Boldle
  * @param props
- * @returns
+ * @returns renders components for game page
  */
 export default function GameClient(props: GameClientProps) {
   /**
-   *
+   *  init state for tracking user's score, guess, and roundData
    */
   const [score, setScore] = useState<number>(0);
-
-  const { setPromptStatus, currPromptAnswer, currPromptURL } = usePrompt({
+  const { roundData, goToNextRound } = useGameRound({
     skinMap: props.skinMap,
   });
-  const [roundStatus, setRoundStatus] = useState<RoundStatus>(
-    RoundStatus.STARTED
-  );
-  const [answer, setAnswer] = useState<string>("");
+  const [userGuess, setUserGuess] = useState<string>("");
 
   /**
-   *
+   *  update score and show next round if user guesses correctly.
+   * @returns true if use guesses correctly, false otherwise
    */
-  useEffect(() => {
-    if (!RoundStatus.FINISHED) return;
-
-    console.log("Game client use effect - create prompt");
-    setPromptStatus(PromptStatus.REFRESH);
-
-    setRoundStatus(RoundStatus.STARTED);
-  }, [roundStatus]);
-
-  useEffect(() => {
-    console.log(score);
-  }, [score]);
-
-  /**
-   *
-   * @returns
-   */
-  function isCorrect() {
-    console.log(currPromptAnswer);
-    if (roundStatus !== RoundStatus.STARTED) return true;
-    if (verifyAnswer(answer, currPromptAnswer)) {
+  function tryUpdateScore() {
+    if (verifyAnswer(userGuess, roundData.correctAnswer)) {
       setScore((prevScore) => prevScore + 1);
-      setRoundStatus(RoundStatus.FINISHED);
+      goToNextRound();
       return true;
     } else {
+      console.log("correct ans is ", roundData.correctAnswer);
       return false;
     }
   }
@@ -107,15 +74,13 @@ export default function GameClient(props: GameClientProps) {
           className="border border-black rounded-m mt-4"
         />
 
-        <UserInput setAnswer={setAnswer} verifyAnswer={isCorrect} />
+        <UserInput setAnswer={setUserGuess} verifyAnswer={tryUpdateScore} />
 
         <DisplayCorrectAnswer
-          answer={currPromptAnswer.skinName}
-          imgUrl={currPromptURL}
-          setPromptStatus={setPromptStatus}
+          answer={roundData.correctAnswer.skinName}
+          imgUrl={roundData.imageURL}
+          goToNextRound={goToNextRound}
         />
-
-        <NextButton promptStatus={setPromptStatus} />
       </div>
     </div>
   );

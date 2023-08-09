@@ -1,7 +1,7 @@
 "use client";
 import { SkinMap } from "@/data/types";
-import React, { useEffect, useState } from "react";
-import { Champion, DEFAULT_CHAMPION } from "../utils/types";
+import { useEffect, useState } from "react";
+import { Champion } from "../utils/types";
 import { getPromptURL } from "@/data/utils";
 import {
   RIOT_IMG_WIDTH,
@@ -12,57 +12,71 @@ import {
 } from "../utils/canvasConstants";
 import useCanvas from "./useCanvas";
 
-export enum PromptStatus {
-  REFRESH, //need to generate new prompt
-  REFRESHED, //finished generating prompt, no action needed
+enum RoundStatus {
+  START, //indicates that new round needs to be started
+  ONGOING,
 }
 
-/**
- * Prop types for usePrompt hook
- */
 type Params = {
   skinMap: SkinMap; //champion names to skins map
 };
 
+/**
+ * indices used for useCanvas hook to crop image
+ */
 type CropIndices = {
   sx: number;
   sy: number;
-}
+};
+
+export type RoundData = {
+  imageURL: string;
+  cropIndices: CropIndices;
+  correctAnswer: Champion;
+};
 
 /**
- * A prompt hook that manages state for generating game prompt and updating canvas
+ * A boldle game prompt hook that manages state for game rounds
  * @param params
  * @returns
  */
-export default function usePrompt(params: Params) {
-  const [promptStatus, setPromptStatus] = useState<PromptStatus>(
-    PromptStatus.REFRESHED
+export default function useGameRound(params: Params) {
+  const [roundStatus, setRoundStatus] = useState<RoundStatus>(
+    RoundStatus.START
   );
-  const [promptTarget, setPromptTarget] = useState<Champion>(DEFAULT_CHAMPION);
-  const [promptImageURL, setPromptImageURL] = useState<string>("");
-  const [cropIndices, setCropIndices] = useState<CropIndices>(generateCropIndices());
+
+  //init roundData with placeholder. Will be replaced with data from api for round 1
+  const [roundData, setRoundData] = useState<RoundData>({
+    imageURL: "",
+    cropIndices: { sx: 0, sy: 0 },
+    correctAnswer: { name: "", skinName: "", skinNum: -1 },
+  });
+
+  //init canvas
   useCanvas({
     canvasID: CANVAS_ID,
-    imageURL: promptImageURL,
-    ...cropIndices
+    imageURL: roundData.imageURL,
+    ...roundData.cropIndices,
   });
 
   useEffect(() => {
-    if (promptStatus !== PromptStatus.REFRESH) return;
-    setCropIndices(generateCropIndices());
+    if (roundStatus !== RoundStatus.START) return;
+    setRoundData({ ...roundData, cropIndices: generateCropIndices() });
     console.log("useEffect prompt status inside hook - preparing prompt");
     preparePrompt();
-    setPromptStatus(PromptStatus.REFRESHED);
-  }, [promptStatus]);
+    setRoundStatus(RoundStatus.ONGOING);
+  }, [roundStatus]);
 
   /**
    * generate new prompt image
    */
   function preparePrompt() {
     const champ = getChampion(params.skinMap);
-
-    setPromptTarget(champ);
-    setPromptImageURL(getPromptURL(champ.name, champ.skinNum));
+    setRoundData({
+      ...roundData,
+      correctAnswer: champ,
+      imageURL: getPromptURL(champ.name, champ.skinNum),
+    });
     console.log("finished creaitng new prompt!");
   }
 
@@ -73,7 +87,9 @@ export default function usePrompt(params: Params) {
    */
   function getChampion(skinMap: SkinMap): Champion {
     let targetChampionName =
-      Object.keys(skinMap)[Math.floor(Math.random() * Object.keys(skinMap).length)];
+      Object.keys(skinMap)[
+        Math.floor(Math.random() * Object.keys(skinMap).length)
+      ];
 
     const numSkins = skinMap[targetChampionName].length;
     const tSkin =
@@ -95,8 +111,15 @@ export default function usePrompt(params: Params) {
   function generateCropIndices() {
     let sx = Math.random() * (RIOT_IMG_WIDTH - CANVAS_WIDTH);
     let sy = Math.random() * (RIOT_IMG_HEIGHT - CANVAS_HEIGHT);
-    return {sx, sy} as CropIndices;
+    return { sx, sy } as CropIndices;
   }
 
-  return { setPromptStatus, currPromptAnswer: promptTarget, currPromptURL: promptImageURL };
+  /**
+   * go to next round
+   */
+  function goToNextRound(){
+    setRoundStatus(RoundStatus.START);
+  }
+
+  return { roundData, goToNextRound };
 }
